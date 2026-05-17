@@ -308,26 +308,7 @@ function cerrarJuego(){
 const TILE = 20;
 let canvas, ctx, snake, dir, nextDir, food, jugando, loopId, puntos, record = 0;
 
-// Ditto dibujado en canvas offscreen
-const dittoImg = document.createElement('canvas');
-dittoImg.width = 20; dittoImg.height = 20;
-const dCtx = dittoImg.getContext('2d');
-// Cuerpo morado
-dCtx.fillStyle = '#b39ddb';
-dCtx.beginPath();
-dCtx.ellipse(10, 11, 9, 8, 0, 0, Math.PI*2);
-dCtx.fill();
-// Ojos
-dCtx.fillStyle = '#1a1a2e';
-dCtx.beginPath(); dCtx.ellipse(7, 9, 2, 2.5, -0.2, 0, Math.PI*2); dCtx.fill();
-dCtx.beginPath(); dCtx.ellipse(13, 9, 2, 2.5, 0.2, 0, Math.PI*2); dCtx.fill();
-// Brillo ojos
-dCtx.fillStyle = 'white';
-dCtx.beginPath(); dCtx.ellipse(6.5, 8, 0.8, 0.8, 0, 0, Math.PI*2); dCtx.fill();
-dCtx.beginPath(); dCtx.ellipse(12.5, 8, 0.8, 0.8, 0, 0, Math.PI*2); dCtx.fill();
-// Boca
-dCtx.strokeStyle = '#1a1a2e'; dCtx.lineWidth = 1.2;
-dCtx.beginPath(); dCtx.moveTo(7,14); dCtx.quadraticCurveTo(10,17,13,14); dCtx.stroke();
+// No se necesita imagen externa, se dibuja directo en tick
 
 function iniciarJuego(){
   canvas = document.getElementById('gameCanvas');
@@ -425,19 +406,25 @@ function dibujar(){
     const x = seg.x * TILE;
     const y = seg.y * TILE;
     if(i === 0){
-      // Cabeza: imagen de Ditto
-      ctx.save();
+      // Cabeza de Ditto dibujada a mano
+      const cx = x + TILE/2, cy = y + TILE/2, r = TILE/2 - 1;
+      ctx.fillStyle = '#b39ddb';
       ctx.beginPath();
-      ctx.roundRect(x+1, y+1, TILE-2, TILE-2, 5);
-      ctx.clip();
-      ctx.drawImage(dittoImg, x+1, y+1, TILE-2, TILE-2);
-// Borde brillante en la cabeza
-ctx.strokeStyle = '#e0c8ff';
-ctx.lineWidth = 1.5;
-ctx.beginPath();
-ctx.roundRect(x+1, y+1, TILE-2, TILE-2, 5);
-ctx.stroke();
-      ctx.restore();
+      ctx.ellipse(cx, cy+1, r, r-1, 0, 0, Math.PI*2);
+      ctx.fill();
+      // Ojos
+      ctx.fillStyle = '#1a1a2e';
+      ctx.beginPath(); ctx.ellipse(cx-3, cy-1, 2, 2.5, -0.2, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx+3, cy-1, 2, 2.5,  0.2, 0, Math.PI*2); ctx.fill();
+      // Brillo ojos
+      ctx.fillStyle = 'white';
+      ctx.beginPath(); ctx.ellipse(cx-3.5, cy-2, 0.8, 0.8, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx+2.5, cy-2, 0.8, 0.8, 0, 0, Math.PI*2); ctx.fill();
+      // Boca
+      ctx.strokeStyle = '#1a1a2e'; ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(cx-3, cy+4); ctx.quadraticCurveTo(cx, cy+7, cx+3, cy+4);
+      ctx.stroke();
     } else {
       // Cuerpo estirado con gradiente morado
       const grad = ctx.createLinearGradient(x, y, x+TILE, y+TILE);
