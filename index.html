@@ -7,212 +7,180 @@
 <title>HollowQ Pixel Labs</title>
 
 <style>
+
 *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, Helvetica, sans-serif;
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
 }
 
 body{
-    background:#081120;
-    color:white;
+  background:#0b1020;
+  color:white;
+  font-family:Arial,sans-serif;
 }
 
-/* NAVBAR */
+/* HEADER */
 
 header{
-    width:100%;
-    padding:20px 40px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    background:#0d1830;
-    position:sticky;
-    top:0;
-    z-index:100;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 40px;
+  background:#111827;
+  border-bottom:2px solid #1f2937;
+  position:sticky;
+  top:0;
+  z-index:999;
 }
 
 .logo{
-    font-size:30px;
-    font-weight:bold;
-    color:#3cc7ff;
+  font-size:28px;
+  font-weight:bold;
+  color:#7ab8ff;
 }
 
 nav{
-    display:flex;
-    gap:20px;
+  display:flex;
+  gap:20px;
 }
 
 nav a{
-    text-decoration:none;
-    color:white;
-    transition:.3s;
-    font-weight:bold;
+  color:white;
+  text-decoration:none;
+  font-weight:bold;
+  transition:0.2s;
 }
 
 nav a:hover{
-    color:#3cc7ff;
+  color:#7ab8ff;
 }
 
 /* HERO */
 
 .hero{
-    min-height:70vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-    text-align:center;
-    padding:40px;
+  height:500px;
+  background:
+  linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.7)),
+  url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1400&auto=format&fit=crop');
+  background-size:cover;
+  background-position:center;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:20px;
+}
+
+.hero-content{
+  max-width:700px;
 }
 
 .hero h1{
-    font-size:60px;
-    margin-bottom:20px;
+  font-size:60px;
+  color:#7ab8ff;
+  margin-bottom:20px;
 }
 
 .hero p{
-    font-size:20px;
-    max-width:700px;
-    color:#cfdfff;
-    margin-bottom:30px;
+  font-size:20px;
+  color:#d1d5db;
+  margin-bottom:30px;
 }
 
 .hero button{
-    padding:15px 30px;
-    border:none;
-    border-radius:12px;
-    background:#3cc7ff;
-    color:black;
-    font-size:18px;
-    font-weight:bold;
-    cursor:pointer;
-    transition:.3s;
+  padding:14px 30px;
+  border:none;
+  border-radius:12px;
+  background:#7ab8ff;
+  color:black;
+  font-size:18px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.2s;
 }
 
 .hero button:hover{
-    transform:scale(1.05);
+  transform:scale(1.05);
 }
 
 /* JUEGOS */
 
 .games{
-    padding:60px 40px;
+  padding:60px 40px;
 }
 
 .games h2{
-    text-align:center;
-    font-size:40px;
-    margin-bottom:40px;
+  text-align:center;
+  margin-bottom:40px;
+  font-size:40px;
+  color:#7ab8ff;
 }
 
-.games-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-    gap:25px;
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:25px;
 }
 
-.game-card{
-    background:#101d38;
-    border-radius:20px;
-    overflow:hidden;
-    transition:.3s;
-    border:2px solid transparent;
+.card{
+  background:#111827;
+  border-radius:18px;
+  overflow:hidden;
+  transition:0.2s;
+  border:2px solid transparent;
 }
 
-.game-card:hover{
-    transform:translateY(-5px);
-    border-color:#3cc7ff;
+.card:hover{
+  transform:translateY(-6px);
+  border-color:#7ab8ff;
 }
 
-.game-image{
-    height:180px;
-    background:linear-gradient(135deg,#3cc7ff,#6f42ff);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:40px;
-    font-weight:bold;
+.card img{
+  width:100%;
+  height:320px;
+  object-fit:cover;
 }
 
-.game-info{
-    padding:20px;
+.card-content{
+  padding:18px;
 }
 
-.game-info h3{
-    margin-bottom:10px;
+.card h3{
+  margin-bottom:10px;
+  color:#7ab8ff;
 }
 
-.game-info p{
-    color:#b9c6e2;
-    margin-bottom:20px;
+.card p{
+  color:#d1d5db;
+  margin-bottom:14px;
 }
 
 .price{
-    font-size:22px;
-    color:#3cc7ff;
-    font-weight:bold;
-    margin-bottom:15px;
+  font-size:22px;
+  font-weight:bold;
+  margin-bottom:15px;
 }
 
-.buy-btn{
-    display:inline-block;
-    padding:12px 20px;
-    background:#3cc7ff;
-    color:black;
-    text-decoration:none;
-    border-radius:10px;
-    font-weight:bold;
-    transition:.3s;
-}
-
-.buy-btn:hover{
-    transform:scale(1.05);
-}
-
-/* BOTON JUEGO */
-
-.play-section{
-    padding:80px 20px;
-    text-align:center;
-}
-
-.play-section h2{
-    font-size:45px;
-    margin-bottom:20px;
-}
-
-.play-section p{
-    color:#cfdfff;
-    margin-bottom:30px;
-    font-size:18px;
-}
-
-.play-btn{
-    display:inline-block;
-    padding:18px 40px;
-    background:#3cc7ff;
-    color:black;
-    text-decoration:none;
-    border-radius:14px;
-    font-size:22px;
-    font-weight:bold;
-    transition:.3s;
-}
-
-.play-btn:hover{
-    transform:scale(1.08);
+.card button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:#7ab8ff;
+  color:black;
+  font-weight:bold;
+  cursor:pointer;
 }
 
 /* FOOTER */
 
 footer{
-    margin-top:50px;
-    padding:30px;
-    text-align:center;
-    background:#0d1830;
-    color:#cfdfff;
+  margin-top:60px;
+  padding:30px;
+  text-align:center;
+  background:#111827;
+  color:#9ca3af;
 }
 
 </style>
@@ -220,105 +188,163 @@ footer{
 <body>
 
 <header>
-    <div class="logo">HollowQ Pixel Labs</div>
 
-    <nav>
-        <a href="#">Inicio</a>
-        <a href="#games">Juegos</a>
-        <a href="#play">Ditto Snake</a>
-    </nav>
+<div class="logo">
+HollowQ Pixel Labs
+</div>
+
+<nav>
+<a href="#">Inicio</a>
+<a href="#juegos">Juegos</a>
+<a href="#">Ofertas</a>
+<a href="#">Contacto</a>
+</nav>
+
 </header>
 
 <section class="hero">
-    <h1>Videojuegos increíbles</h1>
 
-    <p>
-        Compra videojuegos inventados y reales en HollowQ Pixel Labs.
-        Descubre aventuras, acción, terror y minijuegos exclusivos.
-    </p>
+<div class="hero-content">
 
-    <button>Explorar Juegos</button>
-</section>
+<h1>Compra videojuegos increíbles</h1>
 
-<section class="games" id="games">
+<p>
+Juegos inventados y reales con estilo gamer moderno.
+</p>
 
-    <h2>Juegos Destacados</h2>
+<button onclick="window.location.href='ditto.html'">
+Jugar Ditto Snake
+</button>
 
-    <div class="games-grid">
-
-        <div class="game-card">
-            <div class="game-image">PABLO</div>
-
-            <div class="game-info">
-                <h3>Pablo</h3>
-
-                <p>
-                    Juego de aventura creado por Team Mango.
-                    Explora mundos misteriosos y derrota enemigos.
-                </p>
-
-                <div class="price">$29.99</div>
-
-                <a href="#" class="buy-btn">Comprar</a>
-            </div>
-        </div>
-
-        <div class="game-card">
-            <div class="game-image">AMONG</div>
-
-            <div class="game-info">
-                <h3>Among Us</h3>
-
-                <p>
-                    Encuentra al impostor antes de que elimine
-                    a toda la tripulación.
-                </p>
-
-                <div class="price">$4.99</div>
-
-                <a href="#" class="buy-btn">Comprar</a>
-            </div>
-        </div>
-
-        <div class="game-card">
-            <div class="game-image">VOID</div>
-
-            <div class="game-info">
-                <h3>Void Runner</h3>
-
-                <p>
-                    Corre a través del vacío y sobrevive
-                    a niveles imposibles.
-                </p>
-
-                <div class="price">$19.99</div>
-
-                <a href="#" class="buy-btn">Comprar</a>
-            </div>
-        </div>
-
-    </div>
+</div>
 
 </section>
 
-<section class="play-section" id="play">
+<section class="games" id="juegos">
 
-    <h2>🎮 Ditto Snake</h2>
+<h2>Juegos destacados</h2>
 
-    <p>
-        Juega el minijuego exclusivo con habilidades especiales,
-        personajes desbloqueables y poderes únicos.
-    </p>
+<div class="grid">
 
-    <a href="dittosnake.html" class="play-btn">
-        JUGAR AHORA
-    </a>
+<!-- CARD -->
+
+<div class="card">
+
+<img src="https://upload.wikimedia.org/wikipedia/en/9/9a/Minecraft_cover.png">
+
+<div class="card-content">
+
+<h3>Minecraft</h3>
+
+<p>
+Explora, construye y sobrevive en un mundo infinito.
+</p>
+
+<div class="price">$29.99</div>
+
+<button onclick="comprarJuego('Minecraft')">
+Comprar
+</button>
+
+</div>
+</div>
+
+<!-- CARD -->
+
+<div class="card">
+
+<img src="https://upload.wikimedia.org/wikipedia/en/0/05/Hollow_Knight_first_cover_art.webp">
+
+<div class="card-content">
+
+<h3>Hollow Knight</h3>
+
+<p>
+Explora Hallownest en esta aventura oscura y desafiante.
+</p>
+
+<div class="price">$14.99</div>
+
+<button onclick="comprarJuego('Hollow Knight')">
+Comprar
+</button>
+
+</div>
+</div>
+
+<!-- CARD -->
+
+<div class="card">
+
+<img src="https://upload.wikimedia.org/wikipedia/en/9/9f/Among_Us_cover_art.jpg">
+
+<div class="card-content">
+
+<h3>Among Us</h3>
+
+<p>
+Descubre al impostor antes de que elimine a todos.
+</p>
+
+<div class="price">$4.99</div>
+
+<button onclick="comprarJuego('Among Us')">
+Comprar
+</button>
+
+</div>
+</div>
+
+<!-- CARD -->
+
+<div class="card">
+
+<img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200&auto=format&fit=crop">
+
+<div class="card-content">
+
+<h3>Pablo</h3>
+
+<p>
+Juego creado por Team Mango lleno de misterio y acción.
+</p>
+
+<div class="price">$19.99</div>
+
+<button onclick="comprarJuego('Pablo')">
+Comprar
+</button>
+
+</div>
+</div>
+
+</div>
 
 </section>
 
 <footer>
-    © 2026 HollowQ Pixel Labs - Todos los derechos reservados
+© 2026 HollowQ Pixel Labs
 </footer>
+
+<script>
+
+function comprarJuego(juego){
+
+  const correo = 'matthspectre@gmail.com';
+
+  const asunto =
+  encodeURIComponent('Compra de videojuego');
+
+  const mensaje =
+  encodeURIComponent(
+    'Hola, quiero comprar el juego: ' + juego
+  );
+
+  window.location.href =
+  `mailto:${correo}?subject=${asunto}&body=${mensaje}`;
+}
+
+</script>
 
 </body>
 </html>
