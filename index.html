@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -169,6 +170,30 @@
 
     <p id="mensajeJuego" style="color:#7ab8ff;margin-top:12px;font-size:15px;min-height:22px;">¡Presiona Jugar para empezar!</p>
 
+    <!-- Selección de personaje -->
+    <div style="display:flex;justify-content:center;gap:10px;margin-top:12px;flex-wrap:wrap;">
+      <div id="char0" onclick="seleccionarPersonaje(0)" style="cursor:pointer;padding:8px 12px;border-radius:12px;border:2px solid #7ab8ff;background:rgba(122,184,255,0.2);transition:0.3s;">
+        <div style="font-size:11px;color:#aaa;">0 pts</div>
+        <div style="font-size:20px;">🟣</div>
+        <div style="font-size:11px;color:#fff;">Ditto</div>
+      </div>
+      <div id="char1" onclick="seleccionarPersonaje(1)" style="cursor:pointer;padding:8px 12px;border-radius:12px;border:2px solid #444;background:rgba(0,0,0,0.3);transition:0.3s;opacity:0.5;">
+        <div style="font-size:11px;color:#aaa;">20 pts</div>
+        <div style="font-size:20px;">🔒</div>
+        <div style="font-size:11px;color:#fff;">Knight</div>
+      </div>
+      <div id="char2" onclick="seleccionarPersonaje(2)" style="cursor:pointer;padding:8px 12px;border-radius:12px;border:2px solid #444;background:rgba(0,0,0,0.3);transition:0.3s;opacity:0.5;">
+        <div style="font-size:11px;color:#aaa;">50 pts</div>
+        <div style="font-size:20px;">🔒</div>
+        <div style="font-size:11px;color:#fff;">Enderman</div>
+      </div>
+      <div id="char3" onclick="seleccionarPersonaje(3)" style="cursor:pointer;padding:8px 12px;border-radius:12px;border:2px solid #444;background:rgba(0,0,0,0.3);transition:0.3s;opacity:0.5;">
+        <div style="font-size:11px;color:#aaa;">100 pts</div>
+        <div style="font-size:20px;">🔒</div>
+        <div style="font-size:11px;color:#fff;">Impostor</div>
+      </div>
+    </div>
+
     <!-- Controles táctiles para móvil -->
     <div style="display:grid;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(2,44px);gap:6px;justify-content:center;margin-top:14px;">
       <div></div>
@@ -306,11 +331,41 @@ function cerrarJuego(){
   jugando = false;
 }
 
-/* ── Snake con Ditto ── */
+/* ── Snake con personajes ── */
 const TILE = 20;
 let canvas, ctx, snake, dir, nextDir, food, jugando, loopId, puntos, record = 0;
+let personajeActual = 0;
+const DESBLOQUEOS = [0, 20, 50, 100];
+const NOMBRES = ['Ditto', 'Knight', 'Enderman', 'Impostor'];
+const EMOJIS_CUERPO = [
+  {head:'#b39ddb', body1:'#c77dff', body2:'#9b5de5', body3:'#7b2d8b'},
+  {head:'#2a2a2a', body1:'#444', body2:'#222', body3:'#111'},
+  {head:'#1a1a1a', body1:'#111', body2:'#0a0a0a', body3:'#050505'},
+  {head:'#e03c3c', body1:'#ff6b6b', body2:'#cc2222', body3:'#991111'},
+];
 
-// No se necesita imagen externa, se dibuja directo en tick
+function seleccionarPersonaje(i){
+  if(record < DESBLOQUEOS[i]){
+    document.getElementById('mensajeJuego').textContent = `🔒 Necesitas ${DESBLOQUEOS[i]} pts de récord`;
+    return;
+  }
+  personajeActual = i;
+  document.querySelectorAll('[id^="char"]').forEach((el, idx) => {
+    el.style.border = idx === i ? '2px solid #7ab8ff' : '2px solid #444';
+    el.style.background = idx === i ? 'rgba(122,184,255,0.2)' : 'rgba(0,0,0,0.3)';
+  });
+  document.getElementById('mensajeJuego').textContent = `Jugando como: ${NOMBRES[i]}`;
+}
+
+function actualizarPersonajes(){
+  const emojis = ['🟣','🪲','🖤','👻'];
+  document.querySelectorAll('[id^="char"]').forEach((el, i) => {
+    const desbloqueado = record >= DESBLOQUEOS[i];
+    el.style.opacity = desbloqueado ? '1' : '0.5';
+    el.querySelector('div:nth-child(2)').textContent = desbloqueado ? emojis[i] : '🔒';
+    el.style.border = i === personajeActual ? '2px solid #7ab8ff' : (desbloqueado ? '2px solid #555' : '2px solid #444');
+  });
+}
 
 function iniciarJuego(){
   canvas = document.getElementById('gameCanvas');
@@ -343,7 +398,7 @@ function spawnFood(cols, rows){
 
 function cambiarDir(dx, dy){
   if(!jugando) return;
-  if(dx === -nextDir.x && dy === -nextDir.y) return; // no ir en contra
+  if(dx === -nextDir.x && dy === -nextDir.y) return;
   nextDir = {x:dx, y:dy};
 }
 
@@ -362,86 +417,109 @@ function tick(cols, rows){
   dir = nextDir;
   const head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
 
-  // Colisión con paredes
-  if(head.x < 0 || head.x >= cols || head.y < 0 || head.y >= rows){
-    return gameOver();
-  }
-  // Colisión con sí mismo
-  if(snake.some(s => s.x === head.x && s.y === head.y)){
-    return gameOver();
-  }
+  if(head.x < 0 || head.x >= cols || head.y < 0 || head.y >= rows) return gameOver();
+  if(snake.some(s => s.x === head.x && s.y === head.y)) return gameOver();
 
   snake.unshift(head);
 
   if(head.x === food.x && head.y === food.y){
-    puntos++;
+    puntos += 2;
     document.getElementById('score').textContent = puntos;
     if(puntos > record){
       record = puntos;
       document.getElementById('record').textContent = record;
+      actualizarPersonajes();
     }
     spawnFood(cols, rows);
   } else {
     snake.pop();
   }
-
   dibujar();
+}
+
+function dibujarCabeza(x, y){
+  const cx = x + TILE/2, cy = y + TILE/2, r = TILE/2 - 1;
+  const p = personajeActual;
+
+  if(p === 0){ // Ditto
+    ctx.fillStyle = '#b39ddb';
+    ctx.beginPath(); ctx.ellipse(cx, cy+1, r, r-1, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#1a1a2e';
+    ctx.beginPath(); ctx.ellipse(cx-3, cy-1, 2, 2.5, -0.2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx+3, cy-1, 2, 2.5,  0.2, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'white';
+    ctx.beginPath(); ctx.ellipse(cx-3.5, cy-2, 0.8, 0.8, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx+2.5, cy-2, 0.8, 0.8, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#1a1a2e'; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(cx-3, cy+4); ctx.quadraticCurveTo(cx, cy+7, cx+3, cy+4); ctx.stroke();
+
+  } else if(p === 1){ // Knight
+    // Casco blanco
+    ctx.fillStyle = '#ddd';
+    ctx.beginPath(); ctx.roundRect(x+2, y+2, TILE-4, TILE-4, 3); ctx.fill();
+    // Visera negra
+    ctx.fillStyle = '#111';
+    ctx.beginPath(); ctx.roundRect(x+4, y+7, TILE-8, 5, 2); ctx.fill();
+    // Cuernos
+    ctx.fillStyle = '#aaa';
+    ctx.beginPath(); ctx.moveTo(cx-4, y+3); ctx.lineTo(cx-6, y-1); ctx.lineTo(cx-2, y+3); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(cx+4, y+3); ctx.lineTo(cx+6, y-1); ctx.lineTo(cx+2, y+3); ctx.fill();
+
+  } else if(p === 2){ // Enderman
+    // Cabeza negra alargada
+    ctx.fillStyle = '#111';
+    ctx.beginPath(); ctx.roundRect(x+2, y+1, TILE-4, TILE-2, 2); ctx.fill();
+    // Ojos morados brillantes
+    ctx.fillStyle = '#cc00ff';
+    ctx.shadowColor = '#cc00ff'; ctx.shadowBlur = 6;
+    ctx.beginPath(); ctx.roundRect(x+3, y+6, 5, 3, 1); ctx.fill();
+    ctx.beginPath(); ctx.roundRect(x+12, y+6, 5, 3, 1); ctx.fill();
+    ctx.shadowBlur = 0;
+
+  } else if(p === 3){ // Impostor Among Us
+    // Cuerpo rojo
+    ctx.fillStyle = '#cc2222';
+    ctx.beginPath(); ctx.ellipse(cx, cy+2, r-1, r, 0, 0, Math.PI*2); ctx.fill();
+    // Visor azul
+    ctx.fillStyle = '#5bc8f5';
+    ctx.beginPath(); ctx.ellipse(cx, cy-2, r-2, r-3, 0, 0, Math.PI*2); ctx.fill();
+    // Reflejo visor
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.beginPath(); ctx.ellipse(cx-2, cy-4, 2, 1.5, -0.3, 0, Math.PI*2); ctx.fill();
+    // Mochila
+    ctx.fillStyle = '#991111';
+    ctx.beginPath(); ctx.roundRect(x+TILE-6, y+4, 4, 8, 2); ctx.fill();
+  }
 }
 
 function dibujar(){
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Grilla sutil
   ctx.strokeStyle = 'rgba(122,184,255,0.04)';
   ctx.lineWidth = 0.5;
   for(let x=0; x<canvas.width; x+=TILE)  { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }
   for(let y=0; y<canvas.height; y+=TILE) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke(); }
 
-  // Comida
   ctx.font = `${TILE+2}px serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText('🍬', food.x*TILE + TILE/2, food.y*TILE + TILE/2);
 
-  // Cuerpo de Ditto (segmentos estirados en morado)
+  const c = EMOJIS_CUERPO[personajeActual];
   snake.forEach((seg, i) => {
     const x = seg.x * TILE;
     const y = seg.y * TILE;
     if(i === 0){
-      // Cabeza de Ditto dibujada a mano
-      const cx = x + TILE/2, cy = y + TILE/2, r = TILE/2 - 1;
-      ctx.fillStyle = '#b39ddb';
-      ctx.beginPath();
-      ctx.ellipse(cx, cy+1, r, r-1, 0, 0, Math.PI*2);
-      ctx.fill();
-      // Ojos
-      ctx.fillStyle = '#1a1a2e';
-      ctx.beginPath(); ctx.ellipse(cx-3, cy-1, 2, 2.5, -0.2, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(cx+3, cy-1, 2, 2.5,  0.2, 0, Math.PI*2); ctx.fill();
-      // Brillo ojos
-      ctx.fillStyle = 'white';
-      ctx.beginPath(); ctx.ellipse(cx-3.5, cy-2, 0.8, 0.8, 0, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(cx+2.5, cy-2, 0.8, 0.8, 0, 0, Math.PI*2); ctx.fill();
-      // Boca
-      ctx.strokeStyle = '#1a1a2e'; ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.moveTo(cx-3, cy+4); ctx.quadraticCurveTo(cx, cy+7, cx+3, cy+4);
-      ctx.stroke();
+      dibujarCabeza(x, y);
     } else {
-      // Cuerpo estirado con gradiente morado
       const grad = ctx.createLinearGradient(x, y, x+TILE, y+TILE);
-      grad.addColorStop(0,   '#c77dff');
-      grad.addColorStop(0.5, '#9b5de5');
-      grad.addColorStop(1,   '#7b2d8b');
+      grad.addColorStop(0,   c.body1);
+      grad.addColorStop(0.5, c.body2);
+      grad.addColorStop(1,   c.body3);
       ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.roundRect(x+2, y+2, TILE-4, TILE-4, 4);
-      ctx.fill();
-      // Reflejo brillante
+      ctx.beginPath(); ctx.roundRect(x+2, y+2, TILE-4, TILE-4, 4); ctx.fill();
       ctx.fillStyle = 'rgba(255,255,255,0.18)';
-      ctx.beginPath();
-      ctx.roundRect(x+3, y+3, TILE-10, 4, 2);
-      ctx.fill();
+      ctx.beginPath(); ctx.roundRect(x+3, y+3, TILE-10, 4, 2); ctx.fill();
     }
   });
 }
@@ -449,7 +527,6 @@ function dibujar(){
 function gameOver(){
   clearInterval(loopId);
   jugando = false;
-  // Dibuja una última vez con overlay
   dibujar();
   ctx.fillStyle = 'rgba(0,0,0,0.55)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -462,6 +539,7 @@ function gameOver(){
   ctx.fillStyle = '#7ab8ff';
   ctx.fillText(`Puntos: ${puntos}`, canvas.width/2, canvas.height/2 + 18);
   document.getElementById('mensajeJuego').textContent = '¡Presiona Jugar para intentarlo de nuevo!';
+  actualizarPersonajes();
 }
 </script>
 
