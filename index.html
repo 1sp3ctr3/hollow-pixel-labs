@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,371 +7,163 @@
 
 <style>
 body{
-  margin:0;
-  background:#0f172a;
-  color:white;
-  font-family:Arial, sans-serif;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
+    margin:0;
+    background:#0f172a;
+    color:white;
+    font-family:Arial,sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
 }
 
 .panel{
-  background:#111827;
-  padding:20px;
-  border-radius:20px;
-  box-shadow:0 0 20px rgba(0,0,0,0.4);
-  text-align:center;
+    background:#111827;
+    padding:20px;
+    border-radius:20px;
+    box-shadow:0 0 20px rgba(0,0,0,0.4);
+    text-align:center;
 }
 
 canvas{
-  background:#020617;
-  border:3px solid #38bdf8;
-  border-radius:12px;
+    background:#020617;
+    border:3px solid #38bdf8;
+    border-radius:12px;
 }
 
 .top{
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:10px;
-  gap:10px;
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:10px;
 }
 
 button{
-  padding:10px 16px;
-  border:none;
-  border-radius:10px;
-  background:#38bdf8;
-  color:white;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-button:hover{
-  opacity:0.9;
-}
-
-.personajes{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
-  margin:15px 0;
-}
-
-.char{
-  background:#1e293b;
-  border:2px solid #334155;
-  border-radius:12px;
-  padding:10px;
-  cursor:pointer;
-}
-
-.char.activo{
-  border-color:#38bdf8;
-}
-
-.info{
-  margin-top:10px;
-  min-height:20px;
-  color:#7dd3fc;
+    background:#38bdf8;
+    border:none;
+    padding:10px 15px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
 }
 </style>
 </head>
+
 <body>
 
 <div class="panel">
+    <div class="top">
+        <h2>Ditto Snake</h2>
+        <button onclick="restartGame()">Reiniciar</button>
+    </div>
 
-<h1>🐍 Ditto Snake</h1>
+    <canvas id="game" width="400" height="400"></canvas>
 
-<div class="top">
-  <div>⭐ Puntos: <span id="score">0</span></div>
-  <div>🏆 Récord: <span id="record">0</span></div>
-</div>
-
-<div class="personajes">
-
-<div class="char activo" onclick="seleccionarPersonaje(0)">
-  🟣 Ditto<br>
-  <small>Invencible 3s</small>
-</div>
-
-<div class="char" onclick="seleccionarPersonaje(1)">
-  ⚔️ Knight<br>
-  <small>5 atravesadas</small>
-</div>
-
-<div class="char" onclick="seleccionarPersonaje(2)">
-  🖤 Enderman<br>
-  <small>Teleport</small>
-</div>
-
-<div class="char" onclick="seleccionarPersonaje(3)">
-  👻 Impostor<br>
-  <small>Come lejos x7</small>
-</div>
-
-</div>
-
-<canvas id="game" width="500" height="500"></canvas>
-
-<div class="info" id="mensaje"></div>
-
-<br>
-<button onclick="iniciarJuego()">▶ Jugar</button>
-
+    <p>Puntos: <span id="score">0</span></p>
 </div>
 
 <script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
+const box = 20;
 
-const tile = 20;
-const cols = canvas.width / tile;
-const rows = canvas.height / tile;
+let snake = [
+    {x: 200, y: 200}
+];
 
-let snake;
-let dir;
-let nextDir;
-let food;
-let loop;
-let puntos = 0;
-let record = 0;
+let food = {
+    x: Math.floor(Math.random()*20)*box,
+    y: Math.floor(Math.random()*20)*box
+};
 
-let personajeActual = 0;
+let direction = "RIGHT";
+let score = 0;
 
-/* poderes */
-let dittoInvencible = false;
-let knightPasadas = 5;
-let impostorComidas = 7;
+document.addEventListener("keydown", changeDirection);
 
-function seleccionarPersonaje(i){
-
-  personajeActual = i;
-
-  document.querySelectorAll('.char').forEach((e,index)=>{
-    e.classList.toggle('activo', index===i);
-  });
+function changeDirection(event){
+    if(event.key === "ArrowUp" && direction !== "DOWN"){
+        direction = "UP";
+    }
+    else if(event.key === "ArrowDown" && direction !== "UP"){
+        direction = "DOWN";
+    }
+    else if(event.key === "ArrowLeft" && direction !== "RIGHT"){
+        direction = "LEFT";
+    }
+    else if(event.key === "ArrowRight" && direction !== "LEFT"){
+        direction = "RIGHT";
+    }
 }
 
-function iniciarJuego(){
+function draw(){
 
-  snake = [
-    {x:10,y:10},
-    {x:9,y:10},
-    {x:8,y:10}
-  ];
+    ctx.fillStyle = "#020617";
+    ctx.fillRect(0,0,400,400);
 
-  dir = {x:1,y:0};
-  nextDir = {x:1,y:0};
-
-  puntos = 0;
-
-  dittoInvencible = false;
-  knightPasadas = 5;
-  impostorComidas = 7;
-
-  document.getElementById('score').textContent = puntos;
-
-  generarComida();
-
-  clearInterval(loop);
-
-  loop = setInterval(tick, 120);
-}
-
-function generarComida(){
-
-  food = {
-    x: Math.floor(Math.random()*cols),
-    y: Math.floor(Math.random()*rows)
-  };
-}
-
-function tick(){
-
-  dir = nextDir;
-
-  let head = {
-    x: snake[0].x + dir.x,
-    y: snake[0].y + dir.y
-  };
-
-  /* knight */
-  if(personajeActual === 1){
-
-    if(head.x < 0){
-      if(knightPasadas > 0){
-        head.x = cols-1;
-        knightPasadas--;
-      }else return gameOver();
+    for(let i=0;i<snake.length;i++){
+        ctx.fillStyle = i === 0 ? "#38bdf8" : "#7dd3fc";
+        ctx.fillRect(snake[i].x, snake[i].y, box, box);
     }
 
-    if(head.x >= cols){
-      if(knightPasadas > 0){
-        head.x = 0;
-        knightPasadas--;
-      }else return gameOver();
-    }
+    ctx.fillStyle = "#22c55e";
+    ctx.fillRect(food.x, food.y, box, box);
 
-    if(head.y < 0){
-      if(knightPasadas > 0){
-        head.y = rows-1;
-        knightPasadas--;
-      }else return gameOver();
-    }
+    let snakeX = snake[0].x;
+    let snakeY = snake[0].y;
 
-    if(head.y >= rows){
-      if(knightPasadas > 0){
-        head.y = 0;
-        knightPasadas--;
-      }else return gameOver();
-    }
+    if(direction === "UP") snakeY -= box;
+    if(direction === "DOWN") snakeY += box;
+    if(direction === "LEFT") snakeX -= box;
+    if(direction === "RIGHT") snakeX += box;
 
-  }else{
-
-    if(head.x < 0 || head.x >= cols || head.y < 0 || head.y >= rows){
-
-      if(personajeActual === 0 && !dittoInvencible){
-
-        dittoInvencible = true;
-
-        document.getElementById('mensaje').textContent =
-        '🟣 Ditto es invencible por 3 segundos';
-
-        setTimeout(()=>{
-          dittoInvencible = false;
-        },3000);
-
+    if(
+        snakeX < 0 ||
+        snakeY < 0 ||
+        snakeX >= 400 ||
+        snakeY >= 400
+    ){
+        restartGame();
         return;
-      }
-
-      return gameOver();
-    }
-  }
-
-  /* enderman */
-  if(personajeActual === 2){
-
-    const peligro = snake.some(s=>
-      Math.abs(s.x-head.x)<=1 &&
-      Math.abs(s.y-head.y)<=1
-    );
-
-    if(peligro){
-
-      head.x = food.x;
-      head.y = food.y;
-
-      document.getElementById('mensaje').textContent =
-      '🖤 Enderman se teletransportó';
-    }
-  }
-
-  /* choque */
-  if(snake.some(s=>s.x===head.x && s.y===head.y)){
-    return gameOver();
-  }
-
-  snake.unshift(head);
-
-  let comer = false;
-
-  if(head.x === food.x && head.y === food.y){
-    comer = true;
-  }
-
-  /* impostor */
-  if(personajeActual === 3 && impostorComidas > 0){
-
-    const distancia =
-      Math.abs(head.x-food.x)+
-      Math.abs(head.y-food.y);
-
-    if(distancia <= 3){
-
-      comer = true;
-
-      impostorComidas--;
-
-      document.getElementById('mensaje').textContent =
-      '👻 Impostor comió desde lejos';
-    }
-  }
-
-  if(comer){
-
-    puntos += 2;
-
-    document.getElementById('score').textContent = puntos;
-
-    if(puntos > record){
-      record = puntos;
-      document.getElementById('record').textContent = record;
     }
 
-    generarComida();
+    for(let i=1;i<snake.length;i++){
+        if(snakeX === snake[i].x && snakeY === snake[i].y){
+            restartGame();
+            return;
+        }
+    }
 
-  }else{
+    let newHead = {
+        x: snakeX,
+        y: snakeY
+    };
 
-    snake.pop();
-  }
+    if(snakeX === food.x && snakeY === food.y){
+        score++;
+        document.getElementById("score").innerText = score;
 
-  dibujar();
+        food = {
+            x: Math.floor(Math.random()*20)*box,
+            y: Math.floor(Math.random()*20)*box
+        };
+    } else {
+        snake.pop();
+    }
+
+    snake.unshift(newHead);
 }
 
-function dibujar(){
+function restartGame(){
+    snake = [{x:200,y:200}];
+    direction = "RIGHT";
+    score = 0;
 
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  /* comida */
-  ctx.font = '20px Arial';
-  ctx.fillText('🍎', food.x*tile, food.y*tile+18);
-
-  snake.forEach((s,i)=>{
-
-    if(i===0){
-      ctx.fillStyle = '#38bdf8';
-    }else{
-      ctx.fillStyle = '#7dd3fc';
-    }
-
-    ctx.fillRect(s.x*tile, s.y*tile, tile-2, tile-2);
-  });
+    document.getElementById("score").innerText = score;
 }
 
-function gameOver(){
-
-  clearInterval(loop);
-
-  document.getElementById('mensaje').textContent =
-  '💀 Game Over';
-}
-
-/* controles */
-
-document.addEventListener('keydown', e=>{
-
-  if(e.key==='ArrowUp' && dir.y!==1){
-    nextDir = {x:0,y:-1};
-  }
-
-  if(e.key==='ArrowDown' && dir.y!==-1){
-    nextDir = {x:0,y:1};
-  }
-
-  if(e.key==='ArrowLeft' && dir.x!==1){
-    nextDir = {x:-1,y:0};
-  }
-
-  if(e.key==='ArrowRight' && dir.x!==-1){
-    nextDir = {x:1,y:0};
-  }
-});
-
+setInterval(draw, 120);
 </script>
 
 </body>
 </html>
-```
