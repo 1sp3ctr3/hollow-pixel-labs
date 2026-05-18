@@ -3,239 +3,175 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ditto Snake</title>
+<title>HollowQ Pixel Labs</title>
 
 <style>
+
 body{
     margin:0;
+    font-family:Arial;
     background:#0f172a;
     color:white;
-    font-family:Arial;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:100vh;
 }
 
-.panel{
+header{
+    background:#111827;
+    padding:20px;
+    text-align:center;
+    box-shadow:0 0 15px rgba(0,0,0,0.4);
+}
+
+header h1{
+    margin:0;
+    color:#38bdf8;
+}
+
+nav{
+    margin-top:10px;
+}
+
+nav a{
+    color:white;
+    text-decoration:none;
+    margin:0 10px;
+    font-weight:bold;
+}
+
+.hero{
+    padding:60px 20px;
+    text-align:center;
+}
+
+.hero h2{
+    font-size:40px;
+    margin-bottom:10px;
+}
+
+.hero p{
+    color:#cbd5e1;
+    max-width:600px;
+    margin:auto;
+}
+
+.games{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+    padding:30px;
+}
+
+.card{
     background:#111827;
     padding:20px;
     border-radius:20px;
-    text-align:center;
-    width:520px;
+    box-shadow:0 0 15px rgba(0,0,0,0.3);
+    transition:0.2s;
 }
 
-canvas{
-    background:#020617;
-    border:3px solid #38bdf8;
-    border-radius:12px;
+.card:hover{
+    transform:scale(1.03);
 }
 
-.top{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+.card h3{
+    margin-top:0;
+    color:#38bdf8;
 }
 
 button{
     background:#38bdf8;
     border:none;
-    padding:8px 12px;
+    padding:10px 15px;
     border-radius:10px;
     cursor:pointer;
     font-weight:bold;
+    margin-top:10px;
 }
 
-.characters{
-    display:flex;
-    gap:10px;
-    margin-top:15px;
-    flex-wrap:wrap;
-    justify-content:center;
+footer{
+    text-align:center;
+    padding:20px;
+    background:#111827;
+    margin-top:30px;
+    color:#94a3b8;
 }
 
-.character{
-    background:#1e293b;
-    padding:10px;
-    border-radius:12px;
-    width:100px;
-}
-
-.locked{
-    opacity:0.4;
-}
-
-.selected{
-    border:2px solid #38bdf8;
-}
-
-.small{
-    font-size:12px;
-}
 </style>
 </head>
 <body>
 
-<div class="panel">
+<header>
 
-<div class="top">
-<h2>Ditto Snake</h2>
-<button onclick="restartGame()">Reiniciar</button>
+<h1>🎮 HollowQ Pixel Labs</h1>
+
+<nav>
+<a href="#">Inicio</a>
+<a href="#">Juegos</a>
+<a href="#">Tienda</a>
+<a href="#">Contacto</a>
+</nav>
+
+</header>
+
+<section class="hero">
+
+<h2>Videojuegos inventados y reales</h2>
+
+<p>
+Bienvenido a HollowQ Pixel Labs, un sitio con juegos épicos,
+aventuras retro y proyectos creados por la comunidad.
+</p>
+
+</section>
+
+<section class="games">
+
+<div class="card">
+<h3>🐍 Ditto Snake</h3>
+
+<p>
+Juego de snake con personajes, poderes y desbloqueos.
+</p>
+
+<a href="snake.html">
+<button>Jugar</button>
+</a>
 </div>
 
-<canvas id="game" width="400" height="400"></canvas>
+<div class="card">
+<h3>👾 Pablo</h3>
 
-<h3>Puntos: <span id="score">0</span></h3>
+<p>
+Un juego extraño creado por Team Mango lleno de secretos.
+</p>
 
-<p>Presiona F para usar habilidad</p>
-
-<div class="characters">
-
-<div class="character selected" id="dittoCard">
-<h3>🟣 Ditto</h3>
-<p class="small">Invencible 3s</p>
-<button onclick="selectCharacter('ditto')">Usar</button>
+<button>Comprar</button>
 </div>
 
-<div class="character locked" id="knightCard">
-<h3>🛡 Knight</h3>
-<p class="small">20 puntos</p>
-<button onclick="unlockCharacter('knight',20)">Comprar</button>
+<div class="card">
+<h3>🚀 Galaxy Fighters</h3>
+
+<p>
+Batallas espaciales con armas futuristas y bosses gigantes.
+</p>
+
+<button>Comprar</button>
 </div>
 
-<div class="character locked" id="endermanCard">
-<h3>👾 Enderman</h3>
-<p class="small">40 puntos</p>
-<button onclick="unlockCharacter('enderman',40)">Comprar</button>
+<div class="card">
+<h3>🧟 Zombie Escape</h3>
+
+<p>
+Sobrevive hordas infinitas en un mundo destruido.
+</p>
+
+<button>Comprar</button>
 </div>
 
-<div class="character locked" id="impostorCard">
-<h3>🔴 Impostor</h3>
-<p class="small">60 puntos</p>
-<button onclick="unlockCharacter('impostor',60)">Comprar</button>
-</div>
+</section>
 
-</div>
+<footer>
+© 2026 HollowQ Pixel Labs
+</footer>
 
-</div>
-
-<script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-
-const box = 20;
-
-let snake = [{x:200,y:200}];
-
-let food = randomFood();
-
-let direction = "RIGHT";
-
-let score = 0;
-
-let currentCharacter = "ditto";
-
-let unlocked = {
-ditto:true,
-knight:false,
-enderman:false,
-impostor:false
-};
-
-let invincible = false;
-let wallPasses = 5;
-
-document.addEventListener("keydown", changeDirection);
-document.addEventListener("keydown", abilityKey);
-
-function randomFood(){
-return{
-x:Math.floor(Math.random()*20)*box,
-y:Math.floor(Math.random()*20)*box
-};
-}
-
-function changeDirection(e){
-
-if(e.key==="ArrowUp" && direction!=="DOWN"){
-direction="UP";
-}
-else if(e.key==="ArrowDown" && direction!=="UP"){
-direction="DOWN";
-}
-else if(e.key==="ArrowLeft" && direction!=="RIGHT"){
-direction="LEFT";
-}
-else if(e.key==="ArrowRight" && direction!=="LEFT"){
-direction="RIGHT";
-}
-
-}
-
-function abilityKey(e){
-
-if(e.key.toLowerCase()!=="f") return;
-
-if(currentCharacter==="ditto"){
-
-invincible=true;
-
-setTimeout(()=>{
-invincible=false;
-},3000);
-
-}
-
-if(currentCharacter==="enderman"){
-
-snake[0].x = Math.floor(Math.random()*20)*box;
-snake[0].y = Math.floor(Math.random()*20)*box;
-
-}
-
-if(currentCharacter==="impostor"){
-
-if(
-Math.abs(snake[0].x-food.x)<=60 &&
-Math.abs(snake[0].y-food.y)<=60
-){
-score++;
-document.getElementById("score").innerText=score;
-food=randomFood();
-}
-
-}
-
-}
-
-function draw(){
-
-ctx.fillStyle="#020617";
-ctx.fillRect(0,0,400,400);
-
-for(let i=0;i<snake.length;i++){
-
-ctx.fillStyle=i===0 ? "#38bdf8" : "#7dd3fc";
-
-if(currentCharacter==="ditto"){
-ctx.fillStyle=i===0 ? "#c084fc" : "#e9d5ff";
-}
-
-if(currentCharacter==="knight"){
-ctx.fillStyle=i===0 ? "#94a3b8" : "#cbd5e1";
-}
-
-if(currentCharacter==="enderman"){
-ctx.fillStyle=i===0 ? "#a855f7" : "#d8b4fe";
-}
-
-if(currentCharacter==="impostor"){
-ctx.fillStyle=i===0 ? "#ef4444" : "#fca5a5";
-}
-
-ctx.fillRect(snake[i].x,snake[i].y,box,box);
-
-}
-
-ctx.fillStyle="#22c55e";
-ctx.fillRect(food.x,food.y,box,box);
+</body>
+</html>
