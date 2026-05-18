@@ -1,185 +1,200 @@
+# Página completa HTML - Snake con personajes y poderes
+
+Guarda esto como `index.html`
+
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ditto Snake</title>
+
+<style>
+body{
+  margin:0;
+  background:#0f172a;
+  color:white;
+  font-family:Arial, sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
+
+.panel{
+  background:#111827;
+  padding:20px;
+  border-radius:20px;
+  box-shadow:0 0 20px rgba(0,0,0,0.4);
+  text-align:center;
+}
+
+canvas{
+  background:#020617;
+  border:3px solid #38bdf8;
+  border-radius:12px;
+}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+  gap:10px;
+}
+
+button{
+  padding:10px 16px;
+  border:none;
+  border-radius:10px;
+  background:#38bdf8;
+  color:white;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+button:hover{
+  opacity:0.9;
+}
+
+.personajes{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  margin:15px 0;
+}
+
+.char{
+  background:#1e293b;
+  border:2px solid #334155;
+  border-radius:12px;
+  padding:10px;
+  cursor:pointer;
+}
+
+.char.activo{
+  border-color:#38bdf8;
+}
+
+.info{
+  margin-top:10px;
+  min-height:20px;
+  color:#7dd3fc;
+}
+</style>
+</head>
+<body>
+
+<div class="panel">
+
+<h1>🐍 Ditto Snake</h1>
+
+<div class="top">
+  <div>⭐ Puntos: <span id="score">0</span></div>
+  <div>🏆 Récord: <span id="record">0</span></div>
+</div>
+
+<div class="personajes">
+
+<div class="char activo" onclick="seleccionarPersonaje(0)">
+  🟣 Ditto<br>
+  <small>Invencible 3s</small>
+</div>
+
+<div class="char" onclick="seleccionarPersonaje(1)">
+  ⚔️ Knight<br>
+  <small>5 atravesadas</small>
+</div>
+
+<div class="char" onclick="seleccionarPersonaje(2)">
+  🖤 Enderman<br>
+  <small>Teleport</small>
+</div>
+
+<div class="char" onclick="seleccionarPersonaje(3)">
+  👻 Impostor<br>
+  <small>Come lejos x7</small>
+</div>
+
+</div>
+
+<canvas id="game" width="500" height="500"></canvas>
+
+<div class="info" id="mensaje"></div>
+
+<br>
+<button onclick="iniciarJuego()">▶ Jugar</button>
+
+</div>
+
 <script>
 
-/* ── Comprar juego ── */
-function comprarJuego(juego){
-  const correo = 'matthspectre@gmail.com';
-  const asunto = encodeURIComponent('Compra de juego');
-  const mensaje = encodeURIComponent('Hola, quiero comprar el juego: ' + juego);
-  window.location.href = `mailto:${correo}?subject=${asunto}&body=${mensaje}`;
-}
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
 
-/* ── Modal ── */
-function abrirJuego(){
-  document.getElementById('modalJuego').style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-}
+const tile = 20;
+const cols = canvas.width / tile;
+const rows = canvas.height / tile;
 
-function cerrarJuego(){
-  document.getElementById('modalJuego').style.display = 'none';
-  document.body.style.overflow = '';
-  clearInterval(loopId);
-  jugando = false;
-}
-
-/* ── Snake con personajes ── */
-const TILE = 20;
-
-let canvas, ctx, snake, dir, nextDir, food;
-let jugando, loopId, puntos, record = 0;
+let snake;
+let dir;
+let nextDir;
+let food;
+let loop;
+let puntos = 0;
+let record = 0;
 
 let personajeActual = 0;
 
-const DESBLOQUEOS = [0, 20, 50, 100];
-
-const NOMBRES = [
-  'Ditto',
-  'Knight',
-  'Enderman',
-  'Impostor'
-];
-
-const EMOJIS_CUERPO = [
-  {head:'#b39ddb', body1:'#c77dff', body2:'#9b5de5', body3:'#7b2d8b'},
-  {head:'#2a2a2a', body1:'#444', body2:'#222', body3:'#111'},
-  {head:'#1a1a1a', body1:'#111', body2:'#0a0a0a', body3:'#050505'},
-  {head:'#e03c3c', body1:'#ff6b6b', body2:'#cc2222', body3:'#991111'},
-];
-
-/* ── PODERES ── */
-
+/* poderes */
 let dittoInvencible = false;
 let knightPasadas = 5;
 let impostorComidas = 7;
 
 function seleccionarPersonaje(i){
 
-  if(record < DESBLOQUEOS[i]){
-    document.getElementById('mensajeJuego').textContent =
-    `🔒 Necesitas ${DESBLOQUEOS[i]} pts de récord`;
-    return;
-  }
-
   personajeActual = i;
 
-  document.querySelectorAll('[id^="char"]').forEach((el, idx) => {
-
-    el.style.border =
-    idx === i
-    ? '2px solid #7ab8ff'
-    : '2px solid #444';
-
-    el.style.background =
-    idx === i
-    ? 'rgba(122,184,255,0.2)'
-    : 'rgba(0,0,0,0.3)';
-  });
-
-  document.getElementById('mensajeJuego').textContent =
-  `Jugando como: ${NOMBRES[i]}`;
-}
-
-function actualizarPersonajes(){
-
-  const emojis = ['🟣','🪲','🖤','👻'];
-
-  document.querySelectorAll('[id^="char"]').forEach((el, i) => {
-
-    const desbloqueado = record >= DESBLOQUEOS[i];
-
-    el.style.opacity = desbloqueado ? '1' : '0.5';
-
-    el.querySelector('div:nth-child(2)').textContent =
-    desbloqueado ? emojis[i] : '🔒';
-
-    el.style.border =
-    i === personajeActual
-    ? '2px solid #7ab8ff'
-    : (desbloqueado ? '2px solid #555' : '2px solid #444');
-
+  document.querySelectorAll('.char').forEach((e,index)=>{
+    e.classList.toggle('activo', index===i);
   });
 }
 
 function iniciarJuego(){
 
-  canvas = document.getElementById('gameCanvas');
-  ctx = canvas.getContext('2d');
-
-  const cols = Math.floor(canvas.width / TILE);
-  const rows = Math.floor(canvas.height / TILE);
-
   snake = [
-    {x:10, y:8},
-    {x:9, y:8},
-    {x:8, y:8}
+    {x:10,y:10},
+    {x:9,y:10},
+    {x:8,y:10}
   ];
 
-  dir = {x:1, y:0};
-  nextDir = {x:1, y:0};
+  dir = {x:1,y:0};
+  nextDir = {x:1,y:0};
 
   puntos = 0;
-  jugando = true;
-
-  /* RESET PODERES */
 
   dittoInvencible = false;
   knightPasadas = 5;
   impostorComidas = 7;
 
-  document.getElementById('score').textContent = 0;
-  document.getElementById('mensajeJuego').textContent = '';
+  document.getElementById('score').textContent = puntos;
 
-  spawnFood(cols, rows);
+  generarComida();
 
-  clearInterval(loopId);
+  clearInterval(loop);
 
-  loopId = setInterval(() => tick(cols, rows), 120);
+  loop = setInterval(tick, 120);
 }
 
-function spawnFood(cols, rows){
+function generarComida(){
 
-  do {
-
-    food = {
-      x: Math.floor(Math.random() * cols),
-      y: Math.floor(Math.random() * rows)
-    };
-
-  } while(
-    snake.some(s => s.x === food.x && s.y === food.y)
-  );
-}
-
-function cambiarDir(dx, dy){
-
-  if(!jugando) return;
-
-  if(dx === -nextDir.x && dy === -nextDir.y) return;
-
-  nextDir = {x:dx, y:dy};
-}
-
-document.addEventListener('keydown', e => {
-
-  const map = {
-    ArrowUp: [0,-1],
-    ArrowDown: [0,1],
-    ArrowLeft: [-1,0],
-    ArrowRight:[1,0]
+  food = {
+    x: Math.floor(Math.random()*cols),
+    y: Math.floor(Math.random()*rows)
   };
+}
 
-  if(map[e.key]){
-
-    e.preventDefault();
-
-    cambiarDir(...map[e.key]);
-  }
-});
-
-/* ───────────────────────── */
-/* TICK */
-/* ───────────────────────── */
-
-function tick(cols, rows){
+function tick(){
 
   dir = nextDir;
 
@@ -188,63 +203,51 @@ function tick(cols, rows){
     y: snake[0].y + dir.y
   };
 
-  /* ── KNIGHT ── */
-
+  /* knight */
   if(personajeActual === 1){
 
     if(head.x < 0){
-
       if(knightPasadas > 0){
-        head.x = cols - 1;
+        head.x = cols-1;
         knightPasadas--;
-      } else return gameOver();
+      }else return gameOver();
     }
 
     if(head.x >= cols){
-
       if(knightPasadas > 0){
         head.x = 0;
         knightPasadas--;
-      } else return gameOver();
+      }else return gameOver();
     }
 
     if(head.y < 0){
-
       if(knightPasadas > 0){
-        head.y = rows - 1;
+        head.y = rows-1;
         knightPasadas--;
-      } else return gameOver();
+      }else return gameOver();
     }
 
     if(head.y >= rows){
-
       if(knightPasadas > 0){
         head.y = 0;
         knightPasadas--;
-      } else return gameOver();
+      }else return gameOver();
     }
 
-  } else {
+  }else{
 
-    if(
-      head.x < 0 ||
-      head.x >= cols ||
-      head.y < 0 ||
-      head.y >= rows
-    ){
-
-      /* ── DITTO ── */
+    if(head.x < 0 || head.x >= cols || head.y < 0 || head.y >= rows){
 
       if(personajeActual === 0 && !dittoInvencible){
 
         dittoInvencible = true;
 
-        document.getElementById('mensajeJuego').textContent =
-        '🟣 Ditto activó invencibilidad';
+        document.getElementById('mensaje').textContent =
+        '🟣 Ditto es invencible por 3 segundos';
 
-        setTimeout(() => {
+        setTimeout(()=>{
           dittoInvencible = false;
-        }, 3000);
+        },3000);
 
         return;
       }
@@ -253,13 +256,12 @@ function tick(cols, rows){
     }
   }
 
-  /* ── ENDERMAN ── */
-
+  /* enderman */
   if(personajeActual === 2){
 
-    const peligro = snake.some(s =>
-      Math.abs(s.x - head.x) <= 1 &&
-      Math.abs(s.y - head.y) <= 1
+    const peligro = snake.some(s=>
+      Math.abs(s.x-head.x)<=1 &&
+      Math.abs(s.y-head.y)<=1
     );
 
     if(peligro){
@@ -267,25 +269,17 @@ function tick(cols, rows){
       head.x = food.x;
       head.y = food.y;
 
-      document.getElementById('mensajeJuego').textContent =
+      document.getElementById('mensaje').textContent =
       '🖤 Enderman se teletransportó';
     }
   }
 
-  /* choque cuerpo */
-
-  if(
-    snake.some(s =>
-      s.x === head.x &&
-      s.y === head.y
-    )
-  ){
+  /* choque */
+  if(snake.some(s=>s.x===head.x && s.y===head.y)){
     return gameOver();
   }
 
   snake.unshift(head);
-
-  /* ── IMPOSTOR ── */
 
   let comer = false;
 
@@ -293,14 +287,12 @@ function tick(cols, rows){
     comer = true;
   }
 
-  if(
-    personajeActual === 3 &&
-    impostorComidas > 0
-  ){
+  /* impostor */
+  if(personajeActual === 3 && impostorComidas > 0){
 
     const distancia =
-      Math.abs(head.x - food.x) +
-      Math.abs(head.y - food.y);
+      Math.abs(head.x-food.x)+
+      Math.abs(head.y-food.y);
 
     if(distancia <= 3){
 
@@ -308,8 +300,8 @@ function tick(cols, rows){
 
       impostorComidas--;
 
-      document.getElementById('mensajeJuego').textContent =
-      `👻 Impostor usó comer lejos (${impostorComidas})`;
+      document.getElementById('mensaje').textContent =
+      '👻 Impostor comió desde lejos';
     }
   }
 
@@ -320,17 +312,13 @@ function tick(cols, rows){
     document.getElementById('score').textContent = puntos;
 
     if(puntos > record){
-
       record = puntos;
-
       document.getElementById('record').textContent = record;
-
-      actualizarPersonajes();
     }
 
-    spawnFood(cols, rows);
+    generarComida();
 
-  } else {
+  }else{
 
     snake.pop();
   }
@@ -338,160 +326,57 @@ function tick(cols, rows){
   dibujar();
 }
 
-/* ── DIBUJAR CABEZA ── */
-
-function dibujarCabeza(x, y){
-
-  const cx = x + TILE/2;
-  const cy = y + TILE/2;
-  const r = TILE/2 - 1;
-
-  const p = personajeActual;
-
-  if(p === 0){
-
-    ctx.fillStyle = '#b39ddb';
-
-    ctx.beginPath();
-    ctx.ellipse(cx, cy+1, r, r-1, 0, 0, Math.PI*2);
-    ctx.fill();
-
-    ctx.fillStyle = '#1a1a2e';
-
-    ctx.beginPath();
-    ctx.ellipse(cx-3, cy-1, 2, 2.5, -0.2, 0, Math.PI*2);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.ellipse(cx+3, cy-1, 2, 2.5, 0.2, 0, Math.PI*2);
-    ctx.fill();
-
-    ctx.fillStyle = 'white';
-
-    ctx.beginPath();
-    ctx.ellipse(cx-3.5, cy-2, 0.8, 0.8, 0, 0, Math.PI*2);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.ellipse(cx+2.5, cy-2, 0.8, 0.8, 0, 0, Math.PI*2);
-    ctx.fill();
-
-    ctx.strokeStyle = '#1a1a2e';
-    ctx.lineWidth = 1.2;
-
-    ctx.beginPath();
-    ctx.moveTo(cx-3, cy+4);
-    ctx.quadraticCurveTo(cx, cy+7, cx+3, cy+4);
-    ctx.stroke();
-  }
-}
-
 function dibujar(){
 
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  ctx.strokeStyle = 'rgba(122,184,255,0.04)';
-  ctx.lineWidth = 0.5;
+  /* comida */
+  ctx.font = '20px Arial';
+  ctx.fillText('🍎', food.x*tile, food.y*tile+18);
 
-  for(let x=0; x<canvas.width; x+=TILE){
+  snake.forEach((s,i)=>{
 
-    ctx.beginPath();
-    ctx.moveTo(x,0);
-    ctx.lineTo(x,canvas.height);
-    ctx.stroke();
-  }
-
-  for(let y=0; y<canvas.height; y+=TILE){
-
-    ctx.beginPath();
-    ctx.moveTo(0,y);
-    ctx.lineTo(canvas.width,y);
-    ctx.stroke();
-  }
-
-  ctx.font = `${TILE+2}px serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-
-  ctx.fillText(
-    '🍬',
-    food.x*TILE + TILE/2,
-    food.y*TILE + TILE/2
-  );
-
-  const c = EMOJIS_CUERPO[personajeActual];
-
-  snake.forEach((seg, i) => {
-
-    const x = seg.x * TILE;
-    const y = seg.y * TILE;
-
-    if(i === 0){
-
-      dibujarCabeza(x, y);
-
-    } else {
-
-      const grad = ctx.createLinearGradient(
-        x, y,
-        x+TILE, y+TILE
-      );
-
-      grad.addColorStop(0, c.body1);
-      grad.addColorStop(0.5, c.body2);
-      grad.addColorStop(1, c.body3);
-
-      ctx.fillStyle = grad;
-
-      ctx.beginPath();
-      ctx.roundRect(x+2, y+2, TILE-4, TILE-4, 4);
-      ctx.fill();
-
-      ctx.fillStyle = 'rgba(255,255,255,0.18)';
-
-      ctx.beginPath();
-      ctx.roundRect(x+3, y+3, TILE-10, 4, 2);
-      ctx.fill();
+    if(i===0){
+      ctx.fillStyle = '#38bdf8';
+    }else{
+      ctx.fillStyle = '#7dd3fc';
     }
+
+    ctx.fillRect(s.x*tile, s.y*tile, tile-2, tile-2);
   });
 }
 
 function gameOver(){
 
-  clearInterval(loopId);
+  clearInterval(loop);
 
-  jugando = false;
-
-  dibujar();
-
-  ctx.fillStyle = 'rgba(0,0,0,0.55)';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 28px Arial';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-
-  ctx.fillText(
-    '¡Game Over!',
-    canvas.width/2,
-    canvas.height/2 - 18
-  );
-
-  ctx.font = '16px Arial';
-
-  ctx.fillStyle = '#7ab8ff';
-
-  ctx.fillText(
-    `Puntos: ${puntos}`,
-    canvas.width/2,
-    canvas.height/2 + 18
-  );
-
-  document.getElementById('mensajeJuego').textContent =
-  '¡Presiona Jugar para intentarlo de nuevo!';
-
-  actualizarPersonajes();
+  document.getElementById('mensaje').textContent =
+  '💀 Game Over';
 }
 
+/* controles */
+
+document.addEventListener('keydown', e=>{
+
+  if(e.key==='ArrowUp' && dir.y!==1){
+    nextDir = {x:0,y:-1};
+  }
+
+  if(e.key==='ArrowDown' && dir.y!==-1){
+    nextDir = {x:0,y:1};
+  }
+
+  if(e.key==='ArrowLeft' && dir.x!==1){
+    nextDir = {x:-1,y:0};
+  }
+
+  if(e.key==='ArrowRight' && dir.x!==-1){
+    nextDir = {x:1,y:0};
+  }
+});
+
 </script>
+
+</body>
+</html>
+```
